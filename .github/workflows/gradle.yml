@@ -72,6 +72,8 @@ jobs:
         retention-days: 7
 
   dependency-submission:
+    # Only run on push to main/master branch and if dependency graph is enabled
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -91,9 +93,11 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
 
     # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
-    # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
+    # Note: This requires the dependency graph to be enabled in repository settings
+    # See: https://docs.github.com/code-security/supply-chain-security/understanding-your-software-supply-chain/configuring-the-dependency-graph
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@v4
+      continue-on-error: true
 
   release:
     if: github.event_name == 'release'
